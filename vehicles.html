@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vehicles</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="container">
+<h2>{{ category | upper }} Vehicles</h2>
+<form method="POST">
+<select name="vehicle">
+<option>Hero Splendor</option>
+<option>Royal Enfield Classic</option>
+<option>Honda City</option>
+<option>Force Traveller</option>
+</select>
+
+<select name="duration">
+<option value="12 Hours">12 Hours</option>
+<option value="24 Hours">24 Hours</option>
+</select>
+
+<input type="hidden" name="cost" value="1000">
+<button>Proceed</button>
+</form>
+</div>
+</body>
+</html>
