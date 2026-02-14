@@ -1,14 +1,61 @@
 {% extends "base.html" %}
 
+{% block title %}My Files - Cloud Storage{% endblock %}
+
 {% block content %}
 <div class="files-page">
-    <h1><i class="fas fa-folder-open"></i> My Files</h1>
+    <h1>
+        <i class="fas fa-folder-open"></i>
+        My Cloud Files
+    </h1>
+    
+    <!-- Search Bar -->
+    <div style="margin-bottom: var(--spacing-lg);">
+        <input type="text" 
+               id="searchFiles" 
+               placeholder="🔍 Search files..." 
+               style="width: 100%; padding: var(--spacing-md); border: 2px solid var(--gray-light); border-radius: var(--radius-md); font-size: var(--font-size-base);">
+    </div>
     
     {% if files %}
+    <!-- File Statistics -->
     <div class="file-stats">
-        <p><i class="fas fa-chart-bar"></i> Total Files: <strong>{{ files|length }}</strong></p>
+        <div class="stat-item">
+            <i class="fas fa-files"></i>
+            <div class="stat-info">
+                <h4>Total Files</h4>
+                <p id="fileCount">{{ files|length }}</p>
+            </div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-database"></i>
+            <div class="stat-info">
+                <h4>Total Size</h4>
+                <p id="totalSize">
+                    {% set total = namespace(value=0) %}
+                    {% for file in files %}
+                        {% set total.value = total.value + file.size %}
+                    {% endfor %}
+                    {% if total.value > 1048576 %}
+                        {{ "%.2f"|format(total.value/1048576) }} MB
+                    {% elif total.value > 1024 %}
+                        {{ "%.2f"|format(total.value/1024) }} KB
+                    {% else %}
+                        {{ total.value }} B
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="stat-item">
+            <i class="fas fa-cloud"></i>
+            <div class="stat-info">
+                <h4>Storage Type</h4>
+                <p>Local Cloud</p>
+            </div>
+        </div>
     </div>
-
+    
+    <!-- Files Table -->
     <div class="files-table">
         <table>
             <thead>
@@ -22,44 +69,132 @@
             <tbody>
                 {% for file in files %}
                 <tr>
-                    <td class="file-name">
-                        <i class="fas fa-file"></i>
-                        {{ file.display_name }}
+                    <td>
+                        <div class="file-name-cell">
+                            <div class="file-icon">
+                                <i class="fas {{ file.icon }}"></i>
+                            </div>
+                            <div class="file-details">
+                                <div class="name">{{ file.name }}</div>
+                                <div class="meta">ID: {{ file.id }}</div>
+                            </div>
+                        </div>
                     </td>
-                    <td class="file-size">
-                        {% if file.size > 1048576 %}
-                            {{ "%.1f"|format(file.size/1048576) }} MB
-                        {% elif file.size > 1024 %}
-                            {{ "%.1f"|format(file.size/1024) }} KB
-                        {% else %}
-                            {{ file.size }} B
-                        {% endif %}
-                    </td>
-                    <td class="file-date">{{ file.created }}</td>
-                    <td class="file-actions">
-                        <a href="{{ file.url }}" class="btn btn-download" download>
-                            <i class="fas fa-download"></i> Download
-                        </a>
-                        <a href="/delete/{{ file.filename }}" 
-                           class="btn btn-delete" 
-                           onclick="return confirm('Delete this file?')">
-                            <i class="fas fa-trash"></i> Delete
-                        </a>
+                    <td>{{ file.size_formatted }}</td>
+                    <td>{{ file.created_formatted }}</td>
+                    <td>
+                        <div class="file-actions">
+                            <a href="{{ url_for('download_file', filename=file.filename) }}" 
+                               class="btn-action btn-download" 
+                               title="Download">
+                                <i class="fas fa-download"></i>
+                                <span class="action-text">Download</span>
+                            </a>
+                            
+                            <a href="{{ url_for('preview_file', filename=file.filename) }}" 
+                               class="btn-action btn-preview" 
+                               target="_blank"
+                               title="Preview">
+                                <i class="fas fa-eye"></i>
+                                <span class="action-text">Preview</span>
+                            </a>
+                            
+                            <a href="{{ url_for('delete_file', filename=file.filename) }}" 
+                               class="btn-action btn-delete" 
+                               onclick="return confirm('Are you sure you want to delete {{ file.name }}?')"
+                               title="Delete">
+                                <i class="fas fa-trash"></i>
+                                <span class="action-text">Delete</span>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    
+    <!-- No Results Message -->
+    <div id="noResults" style="display: none; text-align: center; padding: var(--spacing-2xl);">
+        <i class="fas fa-search" style="font-size: 3rem; color: var(--gray-light); margin-bottom: var(--spacing-md);"></i>
+        <h3 style="color: var(--gray);">No matching files found</h3>
+        <p style="color: var(--gray);">Try different search terms</p>
+    </div>
+    
     {% else %}
+    <!-- No Files State -->
     <div class="no-files">
-        <i class="fas fa-folder-open fa-4x"></i>
+        <i class="fas fa-cloud-upload-alt"></i>
         <h3>No Files Uploaded Yet</h3>
-        <p>Upload your first file to get started!</p>
-        <a href="/upload" class="btn btn-primary">
-            <i class="fas fa-upload"></i> Upload Files
+        <p>Your cloud storage is empty. Upload your first file to get started!</p>
+        <a href="{{ url_for('upload_file') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-upload"></i>
+            Upload Your First File
         </a>
     </div>
     {% endif %}
 </div>
+
+<style>
+/* Responsive table */
+@media (max-width: 768px) {
+    .action-text {
+        display: none;
+    }
+    
+    .btn-action {
+        padding: var(--spacing-xs);
+    }
+    
+    .file-name-cell .meta {
+        font-size: 0.7rem;
+    }
+}
+
+/* Hover effects */
+.btn-action {
+    position: relative;
+}
+
+.btn-action:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dark);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-bottom: 5px;
+    z-index: 1000;
+}
+</style>
+
+<script>
+// Search functionality
+document.getElementById('searchFiles')?.addEventListener('input', function(e) {
+    const query = e.target.value.toLowerCase();
+    const rows = document.querySelectorAll('tbody tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const fileName = row.querySelector('.name').textContent.toLowerCase();
+        if (fileName.includes(query)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    // Show/hide no results message
+    const noResults = document.getElementById('noResults');
+    if (noResults) {
+        noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+    }
+});
+</script>
 {% endblock %}
