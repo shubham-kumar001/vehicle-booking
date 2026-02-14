@@ -1,42 +1,123 @@
 {% extends "base.html" %}
 
+{% block title %}Home - Cloud Storage{% endblock %}
+
 {% block content %}
 <div class="hero">
-    <h1><i class="fas fa-cloud-upload-alt"></i> Cloud File Storage System</h1>
-    <p class="subtitle">A simple file upload and storage system for your BCA project</p>
+    <h1>
+        <i class="fas fa-cloud-upload-alt"></i>
+        Cloud File Upload Storage System
+    </h1>
+    <p class="subtitle">Secure, Fast, and Reliable Cloud Storage for Your Files</p>
     
+    <!-- Features Grid -->
     <div class="features">
-        <div class="feature">
-            <i class="fas fa-upload"></i>
-            <h3>Upload Files</h3>
-            <p>Upload any file up to 10MB</p>
+        <div class="feature-card">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h3>Easy Upload</h3>
+            <p>Drag and drop files or click to upload. Support for multiple file formats.</p>
         </div>
-        <div class="feature">
-            <i class="fas fa-folder"></i>
-            <h3>Organize</h3>
-            <p>View all your uploaded files</p>
+        
+        <div class="feature-card">
+            <i class="fas fa-lock"></i>
+            <h3>Secure Storage</h3>
+            <p>Your files are stored securely with enterprise-grade encryption.</p>
         </div>
-        <div class="feature">
-            <i class="fas fa-download"></i>
-            <h3>Download</h3>
-            <p>Download files anytime</p>
+        
+        <div class="feature-card">
+            <i class="fas fa-globe"></i>
+            <h3>Access Anywhere</h3>
+            <p>Access your files from any device, anytime, anywhere.</p>
+        </div>
+        
+        <div class="feature-card">
+            <i class="fas fa-share-alt"></i>
+            <h3>Easy Sharing</h3>
+            <p>Share files with others using simple download links.</p>
         </div>
     </div>
-
+    
+    <!-- Call to Action -->
     <div class="cta">
-        <a href="/upload" class="btn btn-primary">
-            <i class="fas fa-upload"></i> Start Uploading
+        <a href="{{ url_for('upload_file') }}" class="btn btn-primary btn-lg">
+            <i class="fas fa-upload"></i>
+            Upload Files
         </a>
-        <a href="/files" class="btn btn-secondary">
-            <i class="fas fa-eye"></i> View Files
+        <a href="{{ url_for('list_files') }}" class="btn btn-secondary btn-lg">
+            <i class="fas fa-folder-open"></i>
+            View Files
         </a>
     </div>
-
+    
+    <!-- Project Information -->
     <div class="info-box">
-        <h3><i class="fas fa-info-circle"></i> Project Info</h3>
-        <p>This is a <strong>BCA Final Year Project</strong> demonstrating cloud file storage concepts.</p>
-        <p><strong>Technology Stack:</strong> Python Flask, HTML, CSS, JavaScript</p>
-        <p><strong>Storage:</strong> Local file system (can be upgraded to cloud storage)</p>
+        <h3>
+            <i class="fas fa-info-circle"></i>
+            About This Project
+        </h3>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <i class="fas fa-code"></i>
+                <h4>Technology Stack</h4>
+                <p>Python Flask, HTML5, CSS3, JavaScript</p>
+            </div>
+            
+            <div class="info-item">
+                <i class="fas fa-database"></i>
+                <h4>Storage</h4>
+                <p>Local file system with cloud-ready architecture</p>
+            </div>
+            
+            <div class="info-item">
+                <i class="fas fa-graduation-cap"></i>
+                <h4>Purpose</h4>
+                <p>BCA Final Year Project</p>
+            </div>
+            
+            <div class="info-item">
+                <i class="fas fa-calendar"></i>
+                <h4>Year</h4>
+                <p>2024</p>
+            </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div style="margin-top: var(--spacing-xl);">
+            <h4 style="margin-bottom: var(--spacing-md);">Quick Stats</h4>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--spacing-md);">
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);" id="quickFileCount">-</div>
+                    <div style="color: var(--gray);">Total Files</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);" id="quickTotalSize">-</div>
+                    <div style="color: var(--gray);">Storage Used</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary);">10MB</div>
+                    <div style="color: var(--gray);">Max File Size</div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+// Update quick stats on home page
+async function updateQuickStats() {
+    try {
+        const response = await fetch('/stats');
+        const stats = await response.json();
+        
+        document.getElementById('quickFileCount').textContent = stats.total_files;
+        document.getElementById('quickTotalSize').textContent = stats.total_size_formatted;
+    } catch (error) {
+        console.error('Failed to load stats:', error);
+    }
+}
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', updateQuickStats);
+</script>
 {% endblock %}
